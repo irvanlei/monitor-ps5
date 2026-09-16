@@ -45,6 +45,62 @@ def init_db():
         columns = [row[1] for row in cursor.fetchall()]
         if "release_date" not in columns:
             cursor.execute("ALTER TABLE products ADD COLUMN release_date TEXT")
+
+        # 2. Tabela de Preços Diários (Histórico dia a dia desde o lançamento)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS daily_prices (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            product_id TEXT NOT NULL,
+            date TEXT NOT NULL,
+            price REAL NOT NULL,
+            original_price REAL,
+            store TEXT NOT NULL,
+            url TEXT,
+            in_stock INTEGER DEFAULT 1,
+            is_promo INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (product_id) REFERENCES products(id),
+            UNIQUE(product_id, date, store)
+        )
+        """)
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_daily_prices_lookup ON daily_prices(product_id, date)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_daily_prices_date ON daily_prices(date)")
+        
+        # 3. Tabela de Metas / Alertas de Preço
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS alerts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            product_id TEXT NOT NULL,
+            target_price REAL NOT NULL,
+            alert_on_all_time_low INTEGER DEFAULT 1,
+            channel TEXT DEFAULT 'all',
+            is_active INTEGER DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            last_triggered_at TIMESTAMP,
+            FOREIGN KEY (product_id) REFERENCES products(id)
+        )
+        """)
+        
+        # 4. Tabela de Configurações (Webhooks, Tokens, Preferências)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS settings (
+            key TEXT PRIMARY KEY,
+            value TEXT
+        )
+        """)
+        
+        # 5. Tabela de Logs de Notificações
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS notification_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            product_id TEXT,
+            price REAL,
+            channel TEXT,
+            status TEXT,
+            message TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """)
             
         # Inserção de produtos padrão caso não existam
         default_products = [
