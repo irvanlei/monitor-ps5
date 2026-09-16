@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor de Preços PS5 & PS5 Pro | Melhor Momento para Comprar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js para visualização diária dos 3 anos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <!-- Notificações Toast -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Barra de Navegação Superior -->
+    <header class="navbar">
+        <div class="nav-container">
+            <div class="logo-area">
+                <div class="ps-icon">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="logo-title">PS5 Tracker <span>Pro</span></h1>
+                    <p class="logo-sub">Monitoramento Diário de 3 Anos • Brasil</p>
+                </div>
+            </div>
+
+            <div class="nav-actions">
+                <!-- Indicador e Switch Tempo Real 3s -->
+                <div class="realtime-pill" id="realtime-pill">
+                    <div class="radar-box">
+                        <span class="radar-pulse"></span>
+                        <span class="radar-core"></span>
+                    </div>
+                    <span class="realtime-text">Tempo Real: <strong id="countdown-text">3s</strong></span>
+                    <label class="toggle-switch" title="Ativar/Pausar atualização automática a cada 3 segundos">
+                        <input type="checkbox" id="realtime-switch" checked onchange="toggleRealtimeMode(this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="status-pill" id="last-update-pill">
+                    <span class="status-dot"></span>
+                    <span id="last-update-text">Atualizado Agora</span>
+                </div>
+
+                <button class="btn btn-primary" id="btn-check-now" onclick="triggerPriceCheck()">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                    </svg>
+                    <span>Verificar Agora</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="main-container">
+        <!-- Abas de Navegação -->
+        <nav class="tabs-nav">
+            <button class="tab-btn active" onclick="switchTab('dashboard')">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+                Visão Geral & Gráficos
+            </button>
+            <button class="tab-btn" onclick="switchTab('stores')">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                Comparativo de Lojas
+            </button>
+            <button class="tab-btn" onclick="switchTab('alerts')">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                Alertas de Preço
+            </button>
+            <button class="tab-btn" onclick="switchTab('settings')">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                Notificações & Canais
+            </button>
+            <button class="tab-btn" onclick="switchTab('logs')">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                Histórico de Disparos
+            </button>
+        </nav>
+
+        <!-- ABA 1: DASHBOARD & GRÁFICOS -->
+        <section id="tab-dashboard" class="tab-content active">
+            <!-- Cards de Seleção dos Modelos -->
+            <div class="models-grid" id="models-container">
+                <!-- Preenchido dinamicamente pelo JavaScript -->
+                <div class="loading-spinner">Carregando dados dos consoles...</div>
+            </div>
+
+            <!-- Card de Inteligência de Compra: Melhor Momento para Comprar -->
+            <div class="recommendation-card" id="recommendation-box">
+                <div class="rec-header">
+                    <div class="rec-console-preview">
+                        <div class="rec-thumb-box">
+                            <img id="rec-console-img" src="/static/img/ps5_pro.svg" alt="Console Selecionado" class="rec-console-img">
+                        </div>
+                        <div class="rec-title-group">
+                            <span class="rec-badge" id="rec-badge">CALCULANDO...</span>
+                            <h2 class="rec-heading" id="rec-heading-title">Análise de Decisão de Compra</h2>
+                        </div>
+                    </div>
+                    <div class="rec-score-wrapper">
+                        <div class="rec-score-circle" id="rec-score-circle">
+                            <span id="rec-score-value">--</span>
+                            <small>/ 100</small>
+                        </div>
+                        <span class="score-label">Índice de Oportunidade</span>
+                    </div>
+                </div>
+
+                <p class="rec-description" id="rec-text">
+                    Avaliando a curva dos últimos 3 anos, mínimas históricas e médias móveis...
+                </p>
+
+                <div class="rec-stats-grid">
+                    <div class="rec-stat-item">
+                        <span class="stat-label">Lançamento no Brasil</span>
+                        <strong class="stat-val text-cyan" id="rec-stat-launch-date">--</strong>
+                        <small id="rec-stat-launch-info">Data oficial de estreia</small>
+                    </div>
+                    <div class="rec-stat-item">
+                        <span class="stat-label">Mínima Histórica</span>
+                        <strong class="stat-val text-success" id="rec-stat-min">R$ --</strong>
+                        <small id="rec-stat-min-date">em --</small>
+                    </div>
+                    <div class="rec-stat-item">
+                        <span class="stat-label">Preço Médio (90 dias)</span>
+                        <strong class="stat-val" id="rec-stat-avg90">R$ --</strong>
+                        <small id="rec-stat-diff-avg">--% em relação à média</small>
+                    </div>
+                    <div class="rec-stat-item">
+                        <span class="stat-label">Preço Oficial (MSRP Sony)</span>
+                        <strong class="stat-val text-muted" id="rec-stat-msrp">R$ --</strong>
+                        <small id="rec-stat-savings">Economia de R$ --</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Área do Gráfico de Histórico Diário desde o Lançamento -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <h3 class="chart-title">Evolução de Preço Dia a Dia</h3>
+                        <p class="chart-subtitle" id="chart-product-subtitle">PlayStation 5 • Linha do tempo desde o lançamento no Brasil</p>
+                    </div>
+                    <!-- Filtros de Período -->
+                    <div class="range-selector">
+                        <button class="range-btn" onclick="changeChartRange('30d')">30 Dias</button>
+                        <button class="range-btn" onclick="changeChartRange('90d')">90 Dias</button>
+                        <button class="range-btn" onclick="changeChartRange('1y')">1 Ano</button>
+                        <button class="range-btn active" onclick="changeChartRange('launch')">Desde o Lançamento (Brasil)</button>
+                    </div>
+                </div>
+
+                <div class="chart-wrapper">
+                    <canvas id="priceHistoryChart"></canvas>
+                </div>
+
+                <div class="chart-footer-stats">
+                    <div class="footer-stat">
+                        <span>Menor Preço no Período:</span>
+                        <strong class="text-success" id="period-min-price">R$ --</strong>
+                    </div>
+                    <div class="footer-stat">
+                        <span>Média do Período:</span>
+                        <strong class="text-blue" id="period-avg-price">R$ --</strong>
+                    </div>
+                    <div class="footer-stat">
+                        <span>Maior Preço no Período:</span>
+                        <strong class="text-danger" id="period-max-price">R$ --</strong>
+                    </div>
+                    <div class="footer-stat">
+                        <span>Total de Cotações Registradas:</span>
+                        <strong id="period-total-points">-- dias</strong>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 2: COMPARATIVO DE LOJAS -->
+        <section id="tab-stores" class="tab-content">
+            <div class="content-card">
+                <div class="card-header">
+                    <div>
+                        <h3 class="card-title">Comparativo das Principais Lojas</h3>
+                        <p class="card-subtitle">Cotações em tempo real nas maiores varejistas do Brasil</p>
+                    </div>
+                    <div class="model-filter-tabs" id="stores-model-tabs">
+                        <!-- Abas de seleção do modelo para tabela de lojas -->
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Loja</th>
+                                <th>Preço à Vista / Pix</th>
+                                <th>Preço Original</th>
+                                <th>Desconto</th>
+                                <th>Disponibilidade</th>
+                                <th>Última Checagem</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stores-table-body">
+                            <tr><td colspan="7" class="text-center">Carregando cotações de lojas...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 3: ALERTAS DE PREÇO -->
+        <section id="tab-alerts" class="tab-content">
+            <div class="grid-2-col">
+                <!-- Formulário de Criação de Alerta -->
+                <div class="content-card">
+                    <h3 class="card-title">Criar Novo Alerta de Preço</h3>
+                    <p class="card-subtitle">Seja notificado no Discord, Telegram ou Email assim que o valor cair</p>
+                    
+                    <form id="form-add-alert" onsubmit="createAlert(event)" class="form-container">
+                        <div class="form-group">
+                            <label for="alert-product">Modelo do PlayStation 5</label>
+                            <select id="alert-product" required class="form-control">
+                                <option value="ps5_slim_digital">PlayStation 5 Slim - Edição Digital</option>
+                                <option value="ps5_slim_disc">PlayStation 5 Slim - Edição com Leitor de Disco</option>
+                                <option value="ps5_pro">PlayStation 5 Pro (2TB)</option>
+                                <option value="ps5_spiderman2">PlayStation 5 - Edição Limitada Marvel's Spider-Man 2</option>
+                                <option value="ps5_ghost">PlayStation 5 - Edição Especial Ghost of Yōtei</option>
+                                <option value="ps5_30th_anniversary">PlayStation 5 - Edição 30º Aniversário</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="alert-price">Preço Alvo Desejado (R$)</label>
+                            <input type="number" id="alert-price" step="10" placeholder="Ex: 3400.00" required class="form-control">
+                            <small class="form-hint">Você será avisado sempre que o preço for igual ou menor que este valor.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="alert-on-min" checked>
+                                <span>Avisar também se atingir uma <strong>Nova Mínima Histórica</strong> de 3 anos</span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="alert-channel">Canal de Envio</label>
+                            <select id="alert-channel" class="form-control">
+                                <option value="all">Todos os Canais Configurados</option>
+                                <option value="discord">Apenas Discord</option>
+                                <option value="telegram">Apenas Telegram</option>
+                                <option value="email">Apenas Email</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                            Salvar Alerta de Preço
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Lista de Alertas Ativos -->
+                <div class="content-card">
+                    <h3 class="card-title">Metas e Alertas Cadastrados</h3>
+                    <p class="card-subtitle">Regras ativas de monitoramento automático</p>
+                    
+                    <div id="alerts-list" class="alerts-list">
+                        <!-- Carregado dinamicamente -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 4: CONFIGURAÇÕES DE NOTIFICAÇÃO -->
+        <section id="tab-settings" class="tab-content">
+            <div class="grid-2-col">
+                <!-- Discord & Telegram -->
+                <div class="content-card">
+                    <h3 class="card-title">Integrações de Chat</h3>
+                    <p class="card-subtitle">Receba mensagens instantâneas com imagens e links diretos</p>
+
+                    <form id="form-settings-chat" onsubmit="saveSettings(event)" class="form-container">
+                        <!-- Discord -->
+                        <div class="channel-card">
+                            <div class="channel-header">
+                                <div class="channel-badge discord-badge">Discord</div>
+                                <button type="button" class="btn btn-sm btn-outline" onclick="testNotification('discord')">Testar Discord</button>
+                            </div>
+                            <div class="form-group">
+                                <label for="setting-discord-url">URL do Webhook do Discord</label>
+                                <input type="url" id="setting-discord-url" placeholder="https://discord.com/api/webhooks/..." class="form-control">
+                                <small class="form-hint">No Discord: Configurações do Servidor > Integrações > Criar Webhook.</small>
+                            </div>
+                        </div>
+
+                        <!-- Telegram -->
+                        <div class="channel-card">
+                            <div class="channel-header">
+                                <div class="channel-badge telegram-badge">Telegram</div>
+                                <button type="button" class="btn btn-sm btn-outline" onclick="testNotification('telegram')">Testar Telegram</button>
+                            </div>
+                            <div class="form-group">
+                                <label for="setting-telegram-token">Token do Bot (@BotFather)</label>
+                                <input type="text" id="setting-telegram-token" placeholder="Ex: 123456789:ABCdefGHIjklMNOpq" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="setting-telegram-chat">Chat ID do Usuário ou Canal</label>
+                                <input type="text" id="setting-telegram-chat" placeholder="Ex: 987654321 ou @meucanal" class="form-control">
+                                <small class="form-hint">Fale com @userinfobot no Telegram para descobrir seu ID numérico.</small>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block">Salvar Configurações</button>
+                    </form>
+                </div>
+
+                <!-- Email & Simulação de Teste -->
+                <div class="content-card">
+                    <h3 class="card-title">Email (SMTP) & Teste de Disparo</h3>
+                    <p class="card-subtitle">Configurações para envio por correio eletrônico e simulações</p>
+
+                    <form id="form-settings-email" onsubmit="saveSettings(event)" class="form-container">
+                        <div class="channel-card">
+                            <div class="channel-header">
+                                <div class="channel-badge email-badge">Email SMTP</div>
+                                <button type="button" class="btn btn-sm btn-outline" onclick="testNotification('email')">Testar Email</button>
+                            </div>
+                            <div class="grid-2-input">
+                                <div class="form-group">
+                                    <label for="setting-email-host">Servidor SMTP</label>
+                                    <input type="text" id="setting-email-host" placeholder="smtp.gmail.com" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label for="setting-email-port">Porta</label>
+                                    <input type="number" id="setting-email-port" value="587" class="form-control">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="setting-email-user">Usuário / Email de Envio</label>
+                                <input type="email" id="setting-email-user" placeholder="seu-email@gmail.com" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="setting-email-pwd">Senha de Aplicativo</label>
+                                <input type="password" id="setting-email-pwd" placeholder="Senha específica para apps" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="setting-email-recip">Destinatário das Notificações</label>
+                                <input type="email" id="setting-email-recip" placeholder="onde-vai-receber@email.com" class="form-control">
+                            </div>
+                        </div>
+
+                        <!-- Ferramenta de Teste de Promoção Relâmpago -->
+                        <div class="simulation-box">
+                            <h4>⚡ Testar Disparo com Super Oferta Simulada</h4>
+                            <p>Simula que uma loja acabou de baixar o preço do PS5 para R$ 2.999,00 para verificar se os seus alertas e notificações tocam de imediato:</p>
+                            <button type="button" class="btn btn-warning btn-block" onclick="simulatePromoDrop()">
+                                🔥 Simular Queda Relâmpago para R$ 2.999,00
+                            </button>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block">Salvar Configurações</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 5: HISTÓRICO DE LOGS -->
+        <section id="tab-logs" class="tab-content">
+            <div class="content-card">
+                <div class="card-header">
+                    <div>
+                        <h3 class="card-title">Registro de Notificações Enviadas</h3>
+                        <p class="card-subtitle">Auditoria e histórico de todos os disparos efetuados pelo sistema local</p>
+                    </div>
+                    <button class="btn btn-sm btn-outline" onclick="loadLogs()">Recarregar Logs</button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Data e Hora</th>
+                                <th>Console</th>
+                                <th>Preço</th>
+                                <th>Canal</th>
+                                <th>Status</th>
+                                <th>Mensagem / Detalhes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logs-table-body">
+                            <tr><td colspan="6" class="text-center">Carregando histórico...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="footer">
+        <div class="footer-container">
+            <p>PS5 & PS5 Pro Local Price Tracker • Dados históricos dia a dia dos últimos 3 anos.</p>
+            <p class="footer-note">Desenvolvido para encontrar o momento matemático ideal de compra do console.</p>
+        </div>
+    </footer>
+
+    <script src="/static/js/app.js?v=20260915_fix"></script>
+</body>
+</html>

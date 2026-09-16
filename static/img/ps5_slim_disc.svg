@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <defs>
+    <linearGradient id="wingWhite" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="60%" stop-color="#e2e8f0"/>
+      <stop offset="100%" stop-color="#cbd5e1"/>
+    </linearGradient>
+    <linearGradient id="bodyBlack" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="50%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <linearGradient id="psBlue" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0070d1"/>
+    </linearGradient>
+    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Base / Sombra -->
+  <ellipse cx="100" cy="180" rx="65" ry="12" fill="#000000" opacity="0.6"/>
+  <rect x="70" y="172" width="60" height="6" rx="3" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+
+  <!-- Asa Esquerda (Outer Shell) -->
+  <path d="M 68 30 C 72 20, 85 24, 88 45 L 86 168 C 85 174, 76 175, 72 172 C 65 155, 62 70, 68 30 Z" 
+        fill="url(#wingWhite)" stroke="#cbd5e1" stroke-width="1.5"/>
+
+  <!-- Luz LED Azul PlayStation Interna Esquerda -->
+  <path d="M 86 35 L 85 165" stroke="url(#psBlue)" stroke-width="2.5" filter="url(#neonGlow)"/>
+
+  <!-- Núcleo Central Preto Black Glossy -->
+  <path d="M 87 35 Q 100 32 113 35 L 115 170 Q 100 173 85 170 Z" 
+        fill="url(#bodyBlack)"/>
+
+  <!-- Luz LED Azul PlayStation Interna Direita -->
+  <path d="M 114 35 L 113 165" stroke="url(#psBlue)" stroke-width="2.5" filter="url(#neonGlow)"/>
+
+  <!-- Asa Direita com Saliência de Leitor de Disco (Disc Drive Bump) -->
+  <path d="M 113 45 C 116 24, 128 20, 132 30 C 138 70, 142 120, 146 145 C 147 160, 140 173, 126 174 L 114 170 Z" 
+        fill="url(#wingWhite)" stroke="#cbd5e1" stroke-width="1.5"/>
+
+  <!-- Slot do Leitor de Disco Físico (Slot Blu-ray) -->
+  <rect x="135" y="125" width="2.5" height="32" rx="1.2" fill="#090d16" stroke="#475569" stroke-width="0.5"/>
+
+  <!-- Vinco Divisório Slim (Corte Horizontal característico do PS5 Slim) -->
+  <path d="M 65 105 L 87 103" stroke="#94a3b8" stroke-width="1.2"/>
+  <path d="M 114 103 L 140 105" stroke="#94a3b8" stroke-width="1.2"/>
+
+  <!-- Botão Power e Eject frontal -->
+  <circle cx="100" cy="155" r="1.5" fill="#64748b"/>
+  <rect x="99" y="160" width="2" height="4" rx="1" fill="#475569"/>
+
+  <!-- Portas USB frontais (USB-C) -->
+  <rect x="98.5" y="85" width="3" height="1.5" rx="0.5" fill="#38bdf8"/>
+  <rect x="98.5" y="92" width="3" height="1.5" rx="0.5" fill="#94a3b8"/>
+
+  <!-- Logo PlayStation no topo da asa esquerda -->
+  <path d="M 72 38 Q 75 36 78 39 Q 75 42 72 40 Z" fill="#64748b" opacity="0.8"/>
+
+  <!-- Badge Disc Icon -->
+  <circle cx="155" cy="50" r="14" fill="#0070d1" opacity="0.95"/>
+  <circle cx="155" cy="50" r="6" fill="#0e1526"/>
+  <circle cx="155" cy="50" r="2" fill="#ffffff"/>
+  <path d="M 152 46 L 158 54" stroke="#ffffff" stroke-width="1" opacity="0.6"/>
+</svg>

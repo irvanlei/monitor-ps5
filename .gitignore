@@ -1,0 +1,31 @@
+# Ambientes Virtuais
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Byte-compiled / cache Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Banco de dados local SQLite (gerado automaticamente no arranque pelo app)
+*.db
+*.db-journal
+*.sqlite3
+
+# Logs e arquivos de sistema
+*.log
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs e Editores
+.vscode/
+.idea/
+*.swp
+*.swo

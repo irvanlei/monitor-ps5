@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <defs>
+    <linearGradient id="spideyRed" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ef4444"/>
+      <stop offset="60%" stop-color="#b91c1c"/>
+      <stop offset="100%" stop-color="#7f1d1d"/>
+    </linearGradient>
+    <linearGradient id="symbioteDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#18181b"/>
+      <stop offset="50%" stop-color="#09090b"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </linearGradient>
+    <linearGradient id="redLed" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f87171"/>
+      <stop offset="50%" stop-color="#dc2626"/>
+      <stop offset="100%" stop-color="#991b1b"/>
+    </linearGradient>
+    <filter id="spideyGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3.5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <clipPath id="leftWingClip">
+      <path d="M 68 30 C 72 20, 85 24, 88 45 L 86 168 C 85 174, 76 175, 72 172 C 65 155, 62 70, 68 30 Z" />
+    </clipPath>
+    <clipPath id="rightWingClip">
+      <path d="M 112 45 C 115 24, 128 20, 132 30 C 138 70, 135 155, 128 172 C 124 175, 115 174, 114 168 L 112 45 Z" />
+    </clipPath>
+  </defs>
+
+  <!-- Base / Sombra -->
+  <ellipse cx="100" cy="180" rx="65" ry="12" fill="#000000" opacity="0.8"/>
+  <rect x="70" y="172" width="60" height="6" rx="3" fill="#18181b" stroke="#3f3f46" stroke-width="1"/>
+
+  <!-- Asa Esquerda Base Vermelha (Spider Red) -->
+  <path d="M 68 30 C 72 20, 85 24, 88 45 L 86 168 C 85 174, 76 175, 72 172 C 65 155, 62 70, 68 30 Z" 
+        fill="url(#spideyRed)" stroke="#991b1b" stroke-width="1.5"/>
+
+  <!-- Simbionte Preto rastejando na Asa Esquerda -->
+  <g clip-path="url(#leftWingClip)">
+    <path d="M 60 90 Q 75 80 88 95 L 88 170 L 60 170 Z" fill="url(#symbioteDark)"/>
+    <path d="M 68 30 Q 80 60 88 50 L 88 30 Z" fill="url(#symbioteDark)"/>
+    <!-- Teias sutis -->
+    <path d="M 68 55 Q 78 58 87 62" stroke="#ffffff" stroke-width="0.7" opacity="0.3"/>
+    <path d="M 66 75 Q 76 80 87 82" stroke="#ffffff" stroke-width="0.7" opacity="0.3"/>
+    <!-- Logo Aranha Branco na Asa Esquerda -->
+    <path d="M 78 70 Q 81 67 84 70 Q 82 77 81 83 Q 80 77 78 70 Z" fill="#ffffff"/>
+    <path d="M 76 68 Q 72 63 68 67" stroke="#ffffff" stroke-width="0.9" fill="none"/>
+    <path d="M 86 68 Q 90 63 94 67" stroke="#ffffff" stroke-width="0.9" fill="none"/>
+    <path d="M 76 74 Q 70 73 67 80" stroke="#ffffff" stroke-width="0.9" fill="none"/>
+    <path d="M 86 74 Q 92 73 95 80" stroke="#ffffff" stroke-width="0.9" fill="none"/>
+  </g>
+
+  <!-- Luz LED Vermelha Esquerda -->
+  <path d="M 86 35 L 85 165" stroke="url(#redLed)" stroke-width="2.8" filter="url(#spideyGlow)"/>
+
+  <!-- Núcleo Central Preto -->
+  <path d="M 87 35 Q 100 32 113 35 L 114 170 Q 100 173 86 170 Z" fill="#09090b"/>
+
+  <!-- Luz LED Vermelha Direita -->
+  <path d="M 114 35 L 113 165" stroke="url(#redLed)" stroke-width="2.8" filter="url(#spideyGlow)"/>
+
+  <!-- Asa Direita (Quase totalmente tomada pelo simbionte Venom) -->
+  <path d="M 112 45 C 115 24, 128 20, 132 30 C 138 70, 135 155, 128 172 C 124 175, 115 174, 114 168 L 112 45 Z" 
+        fill="url(#symbioteDark)" stroke="#27272a" stroke-width="1.5"/>
+
+  <!-- Respingos de vermelho sob o simbionte na asa direita -->
+  <g clip-path="url(#rightWingClip)">
+    <path d="M 120 20 Q 130 35 136 60 L 136 20 Z" fill="url(#spideyRed)" opacity="0.85"/>
+  </g>
+
+  <!-- Portas USB-C frontais com luz rubi -->
+  <rect x="98.5" y="86" width="3" height="1.5" rx="0.5" fill="#f87171"/>
+  <rect x="98.5" y="93" width="3" height="1.5" rx="0.5" fill="#f87171"/>
+
+  <!-- Badge Spider-Man Especial -->
+  <rect x="134" y="36" width="58" height="24" rx="6" fill="#09090b" stroke="#dc2626" stroke-width="1.5"/>
+  <text x="163" y="52" font-family="'Plus Jakarta Sans', sans-serif" font-weight="900" font-size="8.5" fill="#ef4444" text-anchor="middle" letter-spacing="0.5">SPIDER-MAN</text>
+  <circle cx="141" cy="48" r="2" fill="#ef4444"/>
+</svg>
