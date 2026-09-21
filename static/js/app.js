@@ -118,6 +118,12 @@ async function performRealtimeTick() {
             await updateProductDetailsQuiet(selectedProductId);
         }
         
+        // Se a aba de comparativo de lojas estiver aberta, atualiza a tabela a cada 3 segundos
+        const storesTab = document.getElementById("tab-stores");
+        if (storesTab && storesTab.classList.contains("active")) {
+            await loadStoreComparisons(selectedProductId);
+        }
+        
         // Atualiza carimbo de última checagem
         const now = new Date();
         const timeStr = now.toLocaleTimeString('pt-BR');
@@ -253,6 +259,10 @@ async function selectProduct(productId) {
     document.querySelectorAll("#stores-model-tabs .filter-chip").forEach(t => t.classList.remove("active"));
     const activeChip = document.getElementById(`store-tab-${productId}`);
     if (activeChip) activeChip.classList.add("active");
+
+    // Limpar tbody para reconstrução imediata com o novo produto selecionado
+    const tbody = document.getElementById("stores-table-body");
+    if (tbody) tbody.innerHTML = "";
 
     // Atualizar IMEDIATAMENTE a tabela de lojas para o produto clicado
     loadStoreComparisons(productId);
@@ -507,16 +517,49 @@ async function loadStoreComparisons(productId) {
         const resp = await fetch(`/api/stores/${productId}`);
         const stores = await resp.json();
         const tbody = document.getElementById("stores-table-body");
-        tbody.innerHTML = "";
+        if (!tbody) return;
 
         if (!stores.length) {
             tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">Nenhuma cotação registrada recentemente.</td></tr>`;
             return;
         }
 
+        // Se a tabela já tem as linhas das lojas renderizadas para o mesmo produto, atualiza os valores suavemente
+        const existingRows = tbody.querySelectorAll("tr[data-store]");
+        if (existingRows.length === stores.length) {
+            stores.forEach(s => {
+                const row = tbody.querySelector(`tr[data-store="${s.store}"]`);
+                if (row) {
+                    const priceEl = row.querySelector(".store-price");
+                    if (priceEl) {
+                        const oldPriceAttr = priceEl.getAttribute("data-price");
+                        const oldPrice = oldPriceAttr ? parseFloat(oldPriceAttr) : null;
+                        priceEl.textContent = `R$ ${s.price.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+                        priceEl.setAttribute("data-price", s.price);
+                        
+                        if (oldPrice !== null && Math.abs(oldPrice - s.price) > 0.05) {
+                            priceEl.classList.remove("price-flash-drop", "price-flash-rise");
+                            void priceEl.offsetWidth;
+                            priceEl.classList.add(s.price < oldPrice ? "price-flash-drop" : "price-flash-rise");
+                        }
+                    }
+
+                    const timeEl = row.querySelector(".store-time-val");
+                    if (timeEl) {
+                        const timeDisplay = s.time ? `${s.time}` : new Date().toLocaleTimeString('pt-BR');
+                        timeEl.textContent = timeDisplay;
+                    }
+                }
+            });
+            return;
+        }
+
+        tbody.innerHTML = "";
+
         stores.forEach(s => {
             const discount = s.original_price ? Math.round(((s.original_price - s.price) / s.original_price) * 100) : 0;
             const tr = document.createElement("tr");
+            tr.setAttribute("data-store", s.store);
             const timeDisplay = s.time ? `${s.time}` : new Date().toLocaleTimeString('pt-BR');
             const isVerifiedDirect = ["Mercado Livre", "KaBuM!", "Pichau"].includes(s.store);
             const verifiedBadge = isVerifiedDirect
@@ -530,12 +573,12 @@ async function loadStoreComparisons(productId) {
                         ${verifiedBadge}
                     </div>
                 </td>
-                <td><span class="text-success" style="font-weight: 800; font-size: 1.1rem;">R$ ${s.price.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span></td>
+                <td><span class="text-success store-price" data-price="${s.price}" style="font-weight: 800; font-size: 1.1rem; transition: background 0.4s ease, color 0.4s ease; border-radius: 4px; padding: 2px 4px;">R$ ${s.price.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span></td>
                 <td><span class="text-muted" style="text-decoration: line-through;">R$ ${s.original_price ? s.original_price.toLocaleString('pt-BR', {minimumFractionDigits: 2}) : '--'}</span></td>
                 <td><span class="model-discount-pill">${discount}% OFF</span></td>
                 <td><span class="status-dot"></span> Em Estoque</td>
                 <td>
-                    <span style="font-weight: 700; color: #10b981;">Hoje</span> às ${timeDisplay}
+                    <span style="font-weight: 700; color: #10b981;">Hoje</span> às <span class="store-time-val">${timeDisplay}</span>
                     <small style="color: #38bdf8; font-size: 0.75rem; display: block;">(Ao Vivo • 3s)</small>
                 </td>
                 <td>

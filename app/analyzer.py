@@ -22,12 +22,14 @@ def get_product_summary(product_id: str) -> Dict[str, Any]:
         if not prod:
             return {}
         
-        # Último preço registrado
+        # Melhor cotação atual (menor preço da data mais recente)
         latest = conn.execute("""
             SELECT * FROM daily_prices 
-            WHERE product_id = ? 
-            ORDER BY date DESC, id DESC LIMIT 1
-        """, (product_id,)).fetchone()
+            WHERE product_id = ? AND date = (
+                SELECT MAX(date) FROM daily_prices WHERE product_id = ?
+            )
+            ORDER BY price ASC LIMIT 1
+        """, (product_id, product_id)).fetchone()
         
         if not latest:
             return {"product": dict(prod), "has_data": False}
@@ -212,9 +214,10 @@ def get_price_history_series(product_id: str, range_key: str = "launch") -> Dict
                 start_date_str = release_date
 
         rows = conn.execute("""
-            SELECT date, price, store, is_promo 
+            SELECT date, MIN(price) as price, store, MAX(is_promo) as is_promo 
             FROM daily_prices 
             WHERE product_id = ? AND date >= ?
+            GROUP BY date
             ORDER BY date ASC
         """, (product_id, start_date_str)).fetchall()
         

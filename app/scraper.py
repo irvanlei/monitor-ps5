@@ -25,8 +25,8 @@ STORE_TARGETS = {
         {
             "store": "Mercado Livre",
             "url": "https://lista.mercadolivre.com.br/playstation-5-slim-disco",
-            "base_price": 4299.00,
-            "orig_price": 5199.00
+            "base_price": 4251.00,
+            "orig_price": 5319.00
         },
         {
             "store": "KaBuM!",
@@ -364,7 +364,7 @@ _MARKET_BASELINE = {
     "last_fetched": 0,
     "prices": {
         "ps5_slim_digital": 3799.00,
-        "ps5_slim_disc": 4299.00,
+        "ps5_slim_disc": 4251.00,
         "ps5_pro": 6999.00,
         "ps5_spiderman2": 4999.00,
         "ps5_ghost": 4599.00,
