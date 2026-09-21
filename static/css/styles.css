@@ -1093,3 +1093,38 @@ body {
     .chart-wrapper { height: 280px; }
     .models-grid { grid-template-columns: 1fr; }
 }
+
+/* ANIMAÇÕES DE OSCILAÇÃO DE PREÇO AO VIVO (3s) */
+.price-flash-drop {
+    animation: flashGreenAnim 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.price-flash-rise {
+    animation: flashRedAnim 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes flashGreenAnim {
+    0% {
+        background-color: rgba(16, 185, 129, 0.45);
+        color: #10b981 !important;
+        text-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+        border-radius: 4px;
+    }
+    100% {
+        background-color: transparent;
+        text-shadow: none;
+    }
+}
+
+@keyframes flashRedAnim {
+    0% {
+        background-color: rgba(239, 68, 68, 0.45);
+        color: #ef4444 !important;
+        text-shadow: 0 0 10px rgba(239, 68, 68, 0.8);
+        border-radius: 4px;
+    }
+    100% {
+        background-color: transparent;
+        text-shadow: none;
+    }
+}

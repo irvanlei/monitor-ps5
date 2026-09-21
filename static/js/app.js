@@ -95,7 +95,7 @@ async function performRealtimeTick() {
             const newPrice = p.current ? p.current.price : 0;
             const oldPrice = lastKnownPrices[prodId];
             
-            if (oldPrice && Math.abs(oldPrice - newPrice) > 0.05) {
+            if (oldPrice !== undefined && Math.abs(oldPrice - newPrice) > 0.001) {
                 priceChanged = true;
                 const priceEl = document.querySelector(`#card-${prodId} .model-current-price`);
                 if (priceEl) {
@@ -109,12 +109,16 @@ async function performRealtimeTick() {
                 if (storeBadge && p.current) {
                     storeBadge.innerHTML = `Melhor cotação: <strong>${p.current.store}</strong>`;
                 }
+
+                const discountPill = document.querySelector(`#card-${prodId} .model-discount-pill`);
+                if (discountPill && p.current) {
+                    discountPill.textContent = `${p.current.discount_from_msrp_pct || 0}% OFF`;
+                }
             }
             lastKnownPrices[prodId] = newPrice;
         });
         
         if (priceChanged) {
-            playPriceAlertSound();
             await updateProductDetailsQuiet(selectedProductId);
         }
         
@@ -190,6 +194,7 @@ async function loadProducts() {
             const prod = p.product;
             const current = p.current || {};
             const rec = p.recommendation || {};
+            lastKnownPrices[prod.id] = current.price || 0;
 
             const card = document.createElement("div");
             card.className = `model-card ${prod.id === selectedProductId ? 'active' : ''}`;
@@ -530,6 +535,9 @@ async function loadStoreComparisons(productId) {
             stores.forEach(s => {
                 const row = tbody.querySelector(`tr[data-store="${s.store}"]`);
                 if (row) {
+                    // Mantém a tabela em ordem de melhor preço (mais barato no topo)
+                    tbody.appendChild(row);
+
                     const priceEl = row.querySelector(".store-price");
                     if (priceEl) {
                         const oldPriceAttr = priceEl.getAttribute("data-price");
@@ -537,7 +545,7 @@ async function loadStoreComparisons(productId) {
                         priceEl.textContent = `R$ ${s.price.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
                         priceEl.setAttribute("data-price", s.price);
                         
-                        if (oldPrice !== null && Math.abs(oldPrice - s.price) > 0.05) {
+                        if (oldPrice !== null && Math.abs(oldPrice - s.price) > 0.001) {
                             priceEl.classList.remove("price-flash-drop", "price-flash-rise");
                             void priceEl.offsetWidth;
                             priceEl.classList.add(s.price < oldPrice ? "price-flash-drop" : "price-flash-rise");
@@ -548,6 +556,12 @@ async function loadStoreComparisons(productId) {
                     if (timeEl) {
                         const timeDisplay = s.time ? `${s.time}` : new Date().toLocaleTimeString('pt-BR');
                         timeEl.textContent = timeDisplay;
+                    }
+
+                    const discountPill = row.querySelector(".model-discount-pill");
+                    if (discountPill && s.original_price) {
+                        const discount = Math.round(((s.original_price - s.price) / s.original_price) * 100);
+                        discountPill.textContent = `${discount}% OFF`;
                     }
                 }
             });

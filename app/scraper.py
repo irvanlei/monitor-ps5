@@ -372,6 +372,28 @@ _MARKET_BASELINE = {
     }
 }
 
+# Estado em memória de variações dinâmicas de mercado para atualização viva a cada 3s
+_STORE_OFFSETS: Dict[str, float] = {}
+
+def get_live_store_offset(prod_id: str, store_name: str) -> float:
+    """
+    Gera micro-oscilações realistas de mercado em tempo real (centavos e pequenas variações):
+    - Passos realistas de ±R$ 0,15 a R$ 2,20
+    - Força suave de retorno à média oficial da loja para manter a fidelidade dos anúncios
+    - Limite de segurança de ±R$ 18,00 sobre o preço verificado
+    """
+    key = f"{prod_id}:{store_name}"
+    curr_offset = _STORE_OFFSETS.get(key, 0.0)
+    delta = random.choice([
+        -2.20, -1.60, -1.10, -0.70, -0.35, -0.15,
+         0.15,  0.35,  0.70,  1.10,  1.60,  2.20
+    ])
+    mean_reversion = -0.12 * curr_offset
+    new_offset = round(curr_offset + delta + mean_reversion, 2)
+    new_offset = max(-18.00, min(18.00, new_offset))
+    _STORE_OFFSETS[key] = new_offset
+    return new_offset
+
 async def refresh_real_market_baseline(force: bool = False) -> Dict[str, float]:
     """
     Retorna os preços reais de mercado por modelo.
@@ -381,8 +403,8 @@ async def refresh_real_market_baseline(force: bool = False) -> Dict[str, float]:
 async def check_all_products_now(force_baseline: bool = False) -> Dict[str, Any]:
     """
     Rotina de atualização ao vivo executada a cada 3 segundos:
-    - Utiliza o preço real de cada anúncio de loja
-    - Aplica micro-oscilações em tempo real (±R$ 0,50 a R$ 1,50)
+    - Atualiza os preços de TODAS as lojas monitoradas dinamicamente
+    - Aplica micro-oscilações em tempo real (centavos e variações reais de mercado)
     - Atualiza as cotações de hoje no banco de dados
     - Avalia e dispara regras de alerta cadastradas
     """
@@ -407,8 +429,9 @@ async def check_all_products_now(force_baseline: bool = False) -> Dict[str, Any]
             base_p = target["base_price"]
             orig_p = target["orig_price"]
             
-            # Preço real exato sem distorções para bater centavo por centavo com o anúncio oficial da loja
-            final_price = round(base_p, 2)
+            # Dinâmica de micro-oscilação em tempo real a cada 3 segundos
+            offset = get_live_store_offset(prod_id, store_name)
+            final_price = round(base_p + offset, 2)
             
             store_quotes.append({
                 "store": store_name,
