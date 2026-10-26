@@ -18,7 +18,7 @@ STORES = [
     {"name": "KaBuM!", "url_base": "https://www.kabum.com.br/busca/playstation-5"},
     {"name": "Mercado Livre", "url_base": "https://lista.mercadolivre.com.br/playstation-5"},
     {"name": "Magazine Luiza", "url_base": "https://www.magazineluiza.com.br/busca/playstation+5/"},
-    {"name": "Fast Shop", "url_base": "https://www.fastshop.com.br/web/s/playstation%205"},
+    {"name": "Fast Shop", "url_base": "https://site.fastshop.com.br/s?q=playstation+5"},
     {"name": "Casas Bahia", "url_base": "https://www.casasbahia.com.br/busca?str=playstation%205"},
     {"name": "TerabyteShop", "url_base": "https://www.terabyteshop.com.br/busca?str=playstation+5"},
     {"name": "Pichau", "url_base": "https://www.pichau.com.br/search?q=playstation%205"},
@@ -167,14 +167,14 @@ def seed_historical_data(force_reseed: bool = True):
                             else: p = base_p
                             
                         elif pid == "ps5_ghost":
-                            # Anúncio R$ 4.699,90 em 24/09/2024
-                            base_p = 4699.90 - (progress * 150.0) + random.uniform(-30, 30)
-                            if is_promo: p = base_p * discount_factor
+                            # Anúncio R$ 4.699,90 em 24/09/2024 -> Valorização de edição limitada até ~5.899
+                            base_p = 4699.90 + (progress * 1150.0) + random.uniform(-35, 35)
+                            if is_promo: p = base_p * 0.96
                             else: p = base_p
                             
                         elif pid == "ps5_30th_anniversary":
-                            # Lançamento R$ 4.499,90 em 21/11/2024 -> Edição comemorativa
-                            base_p = 4499.90 + (math.sin(day_idx / 30.0) * 150.0) + random.uniform(-30, 40)
+                            # Lançamento R$ 4.499,90 em 21/11/2024 -> Valorização de colecionador até ~6.499
+                            base_p = 4499.90 + (progress * 1950.0) + random.uniform(-40, 40)
                             if is_promo: p = base_p * 0.96
                             else: p = base_p
                             

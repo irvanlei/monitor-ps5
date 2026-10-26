@@ -130,9 +130,9 @@ async def api_get_stores(product_id: str):
     return get_store_comparisons(product_id)
 
 @app.post("/api/check-now")
-async def api_check_now():
+async def api_check_now(force: bool = Query(False)):
     """Força uma verificação imediata dos preços em todas as lojas."""
-    return await check_all_products_now()
+    return await check_all_products_now(force_baseline=force)
 
 @app.post("/api/simulate-sale")
 async def api_simulate_sale(req: SimulateSaleRequest):

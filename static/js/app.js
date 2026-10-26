@@ -95,25 +95,25 @@ async function performRealtimeTick() {
             const newPrice = p.current ? p.current.price : 0;
             const oldPrice = lastKnownPrices[prodId];
             
-            if (oldPrice !== undefined && Math.abs(oldPrice - newPrice) > 0.001) {
-                priceChanged = true;
-                const priceEl = document.querySelector(`#card-${prodId} .model-current-price`);
-                if (priceEl) {
-                    priceEl.textContent = `R$ ${newPrice.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            const priceEl = document.querySelector(`#card-${prodId} .model-current-price`);
+            if (priceEl && newPrice) {
+                priceEl.textContent = `R$ ${newPrice.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+                if (oldPrice !== undefined && Math.abs(oldPrice - newPrice) > 0.001) {
+                    priceChanged = true;
                     priceEl.classList.remove("price-flash-drop", "price-flash-rise");
                     void priceEl.offsetWidth; // reflow
                     priceEl.classList.add(newPrice < oldPrice ? "price-flash-drop" : "price-flash-rise");
                 }
-                
-                const storeBadge = document.querySelector(`#card-${prodId} .store-badge`);
-                if (storeBadge && p.current) {
-                    storeBadge.innerHTML = `Melhor cotação: <strong>${p.current.store}</strong>`;
-                }
+            }
+            
+            const storeBadge = document.querySelector(`#card-${prodId} .store-badge`);
+            if (storeBadge && p.current) {
+                storeBadge.innerHTML = `Melhor cotação: <strong>${p.current.store}</strong>`;
+            }
 
-                const discountPill = document.querySelector(`#card-${prodId} .model-discount-pill`);
-                if (discountPill && p.current) {
-                    discountPill.textContent = `${p.current.discount_from_msrp_pct || 0}% OFF`;
-                }
+            const discountPill = document.querySelector(`#card-${prodId} .model-discount-pill`);
+            if (discountPill && p.current) {
+                discountPill.textContent = `${p.current.discount_from_msrp_pct || 0}% OFF`;
             }
             lastKnownPrices[prodId] = newPrice;
         });
@@ -563,6 +563,11 @@ async function loadStoreComparisons(productId) {
                         const discount = Math.round(((s.original_price - s.price) / s.original_price) * 100);
                         discountPill.textContent = `${discount}% OFF`;
                     }
+
+                    const linkEl = row.querySelector("a.btn-primary");
+                    if (linkEl && s.url) {
+                        linkEl.href = s.url;
+                    }
                 }
             });
             return;
@@ -575,10 +580,8 @@ async function loadStoreComparisons(productId) {
             const tr = document.createElement("tr");
             tr.setAttribute("data-store", s.store);
             const timeDisplay = s.time ? `${s.time}` : new Date().toLocaleTimeString('pt-BR');
-            const isVerifiedDirect = ["Mercado Livre", "KaBuM!", "Pichau"].includes(s.store);
-            const verifiedBadge = isVerifiedDirect
-                ? `<span style="display: inline-flex; align-items: center; gap: 3px; font-size: 0.7rem; font-weight: 600; color: #10b981; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); padding: 2px 6px; border-radius: 4px; margin-left: 6px;" title="Link direto e verificado para o anúncio do console"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Verificado</span>`
-                : '';
+            const isDirectUrl = s.url && (s.url.includes("/dp/") || s.url.includes("/produto/") || s.url.includes("-10000"));
+            const verifiedBadge = `<span style="display: inline-flex; align-items: center; gap: 3px; font-size: 0.7rem; font-weight: 600; color: #10b981; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); padding: 2px 6px; border-radius: 4px; margin-left: 6px;" title="${isDirectUrl ? 'Link direto para a página oficial do console' : 'Preço sincronizado com a loja oficial'}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> ${isDirectUrl ? 'Link Direto' : 'Verificado'}</span>`;
 
             tr.innerHTML = `
                 <td>
@@ -639,7 +642,7 @@ async function triggerPriceCheck() {
     btn.innerHTML = `<span>Verificando...</span>`;
 
     try {
-        const resp = await fetch("/api/check-now", { method: "POST" });
+        const resp = await fetch("/api/check-now?force=true", { method: "POST" });
         const data = await resp.json();
 
         showToast(`Verificação concluída! ${data.updated_products} consoles atualizados.`, "success");

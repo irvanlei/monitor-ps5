@@ -165,17 +165,17 @@ def init_db():
         VALUES (?, ?, ?, ?, ?, ?, ?)
         """, default_products)
         
-        # Atualizar datas oficiais de lançamento no Brasil para todos os consoles existentes
-        official_launch_dates = {
-            "ps5_slim_digital": "2024-01-23",
-            "ps5_slim_disc": "2024-04-17",
-            "ps5_pro": "2024-11-07",
-            "ps5_spiderman2": "2023-10-20",
-            "ps5_ghost": "2024-09-24",
-            "ps5_30th_anniversary": "2024-11-21"
+        # Atualizar datas oficiais de lançamento e MSRP de referência no Brasil para todos os consoles existentes
+        official_specs = {
+            "ps5_slim_digital": ("2024-01-23", 4499.90),
+            "ps5_slim_disc": ("2024-04-17", 4999.90),
+            "ps5_pro": ("2024-11-07", 7999.90),
+            "ps5_spiderman2": ("2023-10-20", 5799.90),
+            "ps5_ghost": ("2024-09-24", 6999.90),
+            "ps5_30th_anniversary": ("2024-11-21", 7499.90)
         }
-        for prod_id, r_date in official_launch_dates.items():
-            cursor.execute("UPDATE products SET release_date = ? WHERE id = ?", (r_date, prod_id))
+        for prod_id, (r_date, msrp_val) in official_specs.items():
+            cursor.execute("UPDATE products SET release_date = ?, msrp = ? WHERE id = ?", (r_date, msrp_val, prod_id))
         
         # Configurações padrão
         default_settings = [
