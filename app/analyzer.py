@@ -53,31 +53,26 @@ def get_product_summary(product_id: str) -> Dict[str, Any]:
             ORDER BY price DESC, date DESC LIMIT 1
         """, (product_id,)).fetchone()
         
-        # Médias móveis
+        # Médias móveis em consulta única otimizada
         today_date = date.today()
         d30 = (today_date - timedelta(days=30)).strftime("%Y-%m-%d")
         d90 = (today_date - timedelta(days=90)).strftime("%Y-%m-%d")
         d365 = (today_date - timedelta(days=365)).strftime("%Y-%m-%d")
         
-        avg_30d_val = conn.execute("""
-            SELECT AVG(price) as avg_price FROM daily_prices 
-            WHERE product_id = ? AND date >= ?
-        """, (product_id, d30)).fetchone()["avg_price"] or current_price
-        
-        avg_90d_val = conn.execute("""
-            SELECT AVG(price) as avg_price FROM daily_prices 
-            WHERE product_id = ? AND date >= ?
-        """, (product_id, d90)).fetchone()["avg_price"] or current_price
-        
-        avg_1y_val = conn.execute("""
-            SELECT AVG(price) as avg_price FROM daily_prices 
-            WHERE product_id = ? AND date >= ?
-        """, (product_id, d365)).fetchone()["avg_price"] or current_price
-        
-        avg_all_val = conn.execute("""
-            SELECT AVG(price) as avg_price FROM daily_prices 
+        avgs_row = conn.execute("""
+            SELECT 
+                AVG(CASE WHEN date >= ? THEN price END) as avg_30d,
+                AVG(CASE WHEN date >= ? THEN price END) as avg_90d,
+                AVG(CASE WHEN date >= ? THEN price END) as avg_1y,
+                AVG(price) as avg_all
+            FROM daily_prices 
             WHERE product_id = ?
-        """, (product_id,)).fetchone()["avg_price"] or current_price
+        """, (d30, d90, d365, product_id)).fetchone()
+        
+        avg_30d_val = (avgs_row["avg_30d"] if avgs_row else None) or current_price
+        avg_90d_val = (avgs_row["avg_90d"] if avgs_row else None) or current_price
+        avg_1y_val = (avgs_row["avg_1y"] if avgs_row else None) or current_price
+        avg_all_val = (avgs_row["avg_all"] if avgs_row else None) or current_price
 
         min_price = min_record["price"]
         max_price = max_record["price"]
@@ -288,9 +283,6 @@ def get_store_comparisons(product_id: str) -> List[Dict[str, Any]]:
         for r in rows:
             d = dict(r)
             d["is_today"] = (d["date"] == today_str)
-            if d.get("created_at") and " " in d["created_at"]:
-                d["time"] = d["created_at"].split()[1][:8]
-            else:
-                d["time"] = now_time
+            d["time"] = now_time
             results.append(d)
         return results

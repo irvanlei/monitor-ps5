@@ -7,6 +7,7 @@ Reflete a curva real de preços do mercado de games no Brasil:
 - Eventos sazonais: Black Friday, Cyber Monday, Prime Day, Dia do Consumidor, Saldões de Natal
 - Lojas: Amazon, KaBuM!, Mercado Livre, Magazine Luiza
 """
+import gc
 import random
 import math
 from datetime import date, datetime, timedelta
@@ -87,15 +88,20 @@ OFFICIAL_BRAZIL_RELEASES = {
     }
 }
 
-def seed_historical_data(force_reseed: bool = True):
+def seed_historical_data(force_reseed: bool = False):
     """
     Popula o banco com histórico diário a partir da DATA EXATA DE LANÇAMENTO DE CADA CONSOLE NO BRASIL.
     Remove qualquer dado anacrônico anterior ao lançamento de cada modelo no mercado brasileiro.
+    Evita recriar milhares de registros em memória se o histórico já estiver populado.
     """
     today_d = date.today()
     today_str = today_d.strftime("%Y-%m-%d")
     
     with get_db() as conn:
+        existing_count = conn.execute("SELECT COUNT(*) as c FROM daily_prices WHERE date < ?", (today_str,)).fetchone()["c"]
+        if existing_count >= 4500 and not force_reseed:
+            print(f"[Seeder] Histórico já populado ({existing_count} registros). Pulando re-seed para economizar memória.")
+            return
         print("[Seeder] Verificando e calibrando linhas do tempo com base no lançamento oficial no Brasil...")
         
         # 1. Limpeza de registros anacrônicos (anteriores à data de lançamento de cada modelo)
@@ -108,8 +114,8 @@ def seed_historical_data(force_reseed: bool = True):
             if del_count > 0:
                 print(f"[Seeder] Removidos {del_count} registros anacrônicos anteriores ao lançamento de {pid} ({launch_str}).")
                 
-        # 2. Se force_reseed estiver ativo, regerar os dias intermediários desde o lançamento até ontem
-        if force_reseed:
+        # 2. Se necessário ou se force_reseed estiver ativo, regerar os dias intermediários desde o lançamento até ontem
+        if force_reseed or existing_count < 4500:
             random.seed(42)
             all_records = []
             
@@ -195,6 +201,8 @@ def seed_historical_data(force_reseed: bool = True):
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """, all_records)
             print(f"[Seeder] Sucesso: {len(all_records)} registros diários gerados a partir do lançamento oficial de cada console no Brasil!")
+            del all_records
+    gc.collect()
 
 if __name__ == "__main__":
     from app.database import init_db

@@ -31,10 +31,10 @@ async def lifespan(app: FastAPI):
     print("[FastAPI] Inicializando banco de dados...")
     init_db()
     # Verifica e gera histórico de 3 anos caso necessário
-    seed_historical_data()
-    print("[FastAPI] Coletando preços reais ao vivo do mercado brasileiro...")
+    seed_historical_data(force_reseed=False)
+    print("[FastAPI] Sincronizando base inicial de preços...")
     try:
-        await check_all_products_now(force_baseline=True)
+        await check_all_products_now(force_baseline=False)
     except Exception as e:
         print(f"[FastAPI] Aviso ao coletar base inicial: {e}")
     # Inicia agendador
